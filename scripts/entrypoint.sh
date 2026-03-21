@@ -143,7 +143,6 @@ configure_radius() {
 shutdown_handler() {
     log "Received shutdown signal. Stopping services..."
     supervisorctl stop all 2>/dev/null || true
-    su - postgres -c "pg_ctl stop -D $PGDATA -m fast -w" 2>/dev/null || true
     log "All services stopped."
     exit 0
 }
