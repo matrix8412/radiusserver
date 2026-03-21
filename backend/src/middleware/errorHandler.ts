@@ -3,8 +3,8 @@ import { Request, Response, NextFunction } from 'express';
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction): void {
   console.error('[error]', err.message, err.stack);
 
-  const statusCode = (err as Record<string, unknown>).statusCode as number || 500;
-  const code = (err as Record<string, unknown>).code as string || 'INTERNAL_ERROR';
+  const statusCode = (err as unknown as Record<string, unknown>).statusCode as number || 500;
+  const code = (err as unknown as Record<string, unknown>).code as string || 'INTERNAL_ERROR';
 
   res.status(statusCode).json({
     error: {

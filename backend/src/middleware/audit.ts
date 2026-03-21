@@ -4,7 +4,7 @@ import pool from '../db/pool';
 export function auditMiddleware(action: string, entityType?: string) {
   return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     // Store audit info on the request for later logging
-    (req as Record<string, unknown>)._audit = { action, entityType };
+    (req as unknown as Record<string, unknown>)._audit = { action, entityType };
     next();
   };
 }
