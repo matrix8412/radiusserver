@@ -11,12 +11,12 @@ FROM node:20-alpine AS builder
 WORKDIR /build
 
 # Backend dependencies
-COPY backend/package.json backend/package-lock.json* ./backend/
-RUN cd backend && npm ci --ignore-scripts
+COPY backend/package.json ./backend/
+RUN cd backend && npm install --ignore-scripts
 
 # Frontend dependencies
-COPY frontend/package.json frontend/package-lock.json* ./frontend/
-RUN cd frontend && npm ci
+COPY frontend/package.json ./frontend/
+RUN cd frontend && npm install
 
 # Backend source & build
 COPY backend/ ./backend/
