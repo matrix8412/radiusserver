@@ -9,6 +9,9 @@ sql {
     dialect = "postgresql"
     driver = "rlm_sql_${dialect}"
 
+    # Group attribute name (instance name is "sql")
+    group_attribute = "sql-SQL-Group"
+
     server = "127.0.0.1"
     port = 5432
     login = "%%POSTGRES_USER%%"
@@ -30,7 +33,6 @@ sql {
         idle_timeout = 60
     }
 
-    # Safe characters for SQL escaping
     safe_characters = "@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_: /+"
 
     # ============================================================
@@ -192,6 +194,5 @@ sql {
                     '%{reply:Packet-Type}', NOW(), NULLIF('%{Class}',''))"
     }
 
-    # Group attribute
-    group_attribute = "${.:instance}-SQL-Group"
+    # Group attribute is defined at the top of this block
 }
