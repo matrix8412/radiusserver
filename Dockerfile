@@ -12,7 +12,7 @@ WORKDIR /build
 
 # Backend dependencies
 COPY backend/package.json ./backend/
-RUN cd backend && npm install --ignore-scripts
+RUN cd backend && npm install
 
 # Frontend dependencies
 COPY frontend/package.json ./frontend/
@@ -45,6 +45,8 @@ RUN apk add --no-cache \
 # ---- Directory setup ----
 RUN mkdir -p /var/lib/postgresql/data /run/postgresql /var/log/supervisor \
              /var/log/postgresql \
+             /var/log/radius/radacct \
+             /var/run/radiusd \
              /app/backend /app/frontend /app/scripts /app/database \
              /backup /etc/raddb/certs \
     && chown -R postgres:postgres /var/lib/postgresql /run/postgresql /var/log/postgresql
@@ -79,6 +81,7 @@ RUN cp /tmp/freeradius-custom/mods-available/sql   /etc/raddb/mods-available/sql
     cp /tmp/freeradius-custom/radiusd.conf            /etc/raddb/radiusd.conf && \
     ln -sf /etc/raddb/mods-available/sql       /etc/raddb/mods-enabled/sql && \
     ln -sf /etc/raddb/mods-available/exec_totp /etc/raddb/mods-enabled/exec_totp && \
+    ln -sf /etc/raddb/sites-available/default  /etc/raddb/sites-enabled/default && \
     ln -sf /etc/raddb/sites-available/radsec   /etc/raddb/sites-enabled/radsec && \
     rm -rf /tmp/freeradius-custom && \
     chown -R radius:radius /etc/raddb
