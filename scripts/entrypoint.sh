@@ -43,7 +43,7 @@ EOF
 # ---- Start PostgreSQL temporarily for setup ----
 start_postgres_temp() {
     log "Starting PostgreSQL for setup..."
-    su - postgres -c "pg_ctl start -D $PGDATA -l /var/log/postgresql-init.log -o \"-c listen_addresses='127.0.0.1' -c port=5432\" -w -t 30"
+    su - postgres -c "pg_ctl start -D $PGDATA -l /var/log/postgresql/init.log -o \"-c listen_addresses='127.0.0.1' -c port=5432\" -w -t 30"
     log "PostgreSQL started."
 }
 

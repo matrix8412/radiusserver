@@ -44,9 +44,10 @@ RUN apk add --no-cache \
 
 # ---- Directory setup ----
 RUN mkdir -p /var/lib/postgresql/data /run/postgresql /var/log/supervisor \
+             /var/log/postgresql \
              /app/backend /app/frontend /app/scripts /app/database \
              /backup /etc/raddb/certs \
-    && chown -R postgres:postgres /var/lib/postgresql /run/postgresql
+    && chown -R postgres:postgres /var/lib/postgresql /run/postgresql /var/log/postgresql
 
 # ---- Copy built backend ----
 COPY --from=builder /build/backend/dist        /app/backend/
