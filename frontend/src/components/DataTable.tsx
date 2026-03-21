@@ -29,7 +29,8 @@ interface DataTableProps<T> {
   loading?: boolean;
 }
 
-function DataTable<T extends Record<string, unknown>>({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function DataTable<T extends Record<string, any>>({
   columns,
   rows,
   total,

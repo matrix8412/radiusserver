@@ -51,8 +51,8 @@ const SessionsPage: React.FC = () => {
       <Typography variant="h4" sx={{ mb: 2 }}>{t('sessions.title')}</Typography>
       <TextField placeholder={t('app.search')} size="small" value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} sx={{ mb: 2, minWidth: 300 }} />
       <DataTable
-        columns={columns as Column<Record<string, unknown>>[]}
-        rows={(data?.data || []) as Record<string, unknown>[]}
+        columns={columns}
+        rows={data?.data || []}
         total={data?.total || 0}
         page={page}
         rowsPerPage={rowsPerPage}

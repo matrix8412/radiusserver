@@ -123,8 +123,8 @@ const AttributesPage: React.FC = () => {
         <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>{t('attributes.create')}</Button>
       </Box>
       <DataTable
-        columns={columns as Column<Record<string, unknown>>[]}
-        rows={(data?.data || []) as Record<string, unknown>[]}
+        columns={columns}
+        rows={data?.data || []}
         total={data?.total || 0}
         page={page}
         rowsPerPage={rowsPerPage}

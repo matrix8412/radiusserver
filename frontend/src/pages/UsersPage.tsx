@@ -174,7 +174,7 @@ const UsersPage: React.FC = () => {
       />
       <DataTable
         columns={columns}
-        rows={(data?.data || []) as unknown as Record<string, unknown>[]}
+        rows={data?.data || []}
         total={data?.total || 0}
         page={page}
         rowsPerPage={rowsPerPage}

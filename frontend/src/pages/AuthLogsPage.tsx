@@ -21,7 +21,7 @@ const AuthLogsPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [search, setSearch] = useState('');
   const [purgeOpen, setPurgeOpen] = useState(false);
-  const [purgeDays, setPurgeDays] = useState(90);
+  const [purgeDays] = useState(90);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
   const { data, isLoading } = useQuery({
@@ -66,8 +66,8 @@ const AuthLogsPage: React.FC = () => {
       </Box>
       <TextField placeholder={t('app.search')} size="small" value={search} onChange={(e) => { setSearch(e.target.value); setPage(0); }} sx={{ mb: 2, minWidth: 300 }} />
       <DataTable
-        columns={columns as Column<Record<string, unknown>>[]}
-        rows={(data?.data || []) as Record<string, unknown>[]}
+        columns={columns}
+        rows={data?.data || []}
         total={data?.total || 0}
         page={page}
         rowsPerPage={rowsPerPage}
