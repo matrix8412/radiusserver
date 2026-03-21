@@ -49,7 +49,8 @@ RUN mkdir -p /var/lib/postgresql/data /run/postgresql /var/log/supervisor \
              /var/run/radiusd \
              /app/backend /app/frontend /app/scripts /app/database \
              /backup /etc/raddb/certs \
-    && chown -R postgres:postgres /var/lib/postgresql /run/postgresql /var/log/postgresql
+    && chown -R postgres:postgres /var/lib/postgresql /run/postgresql /var/log/postgresql \
+    && chown -R radius:radius /var/log/radius /var/run/radiusd
 
 # ---- Copy built backend ----
 COPY --from=builder /build/backend/dist        /app/backend/
