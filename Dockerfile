@@ -84,6 +84,7 @@ RUN cp /tmp/freeradius-custom/mods-available/sql   /etc/raddb/mods-available/sql
     ln -sf /etc/raddb/mods-available/exec_totp /etc/raddb/mods-enabled/exec_totp && \
     ln -sf /etc/raddb/sites-available/default  /etc/raddb/sites-enabled/default && \
     ln -sf /etc/raddb/sites-available/radsec   /etc/raddb/sites-enabled/radsec && \
+    rm -f /etc/raddb/sites-enabled/inner-tunnel && \
     rm -rf /tmp/freeradius-custom && \
     chown -R radius:radius /etc/raddb
 
