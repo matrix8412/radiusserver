@@ -21,7 +21,7 @@ server radsec {
             dh_file             = /etc/raddb/certs/dh.pem
 
             fragment_size       = 8192
-            ca_path             = ${cadir}
+            ca_path             = /etc/raddb/certs
             cipher_list         = "ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20:!aNULL:!MD5:!DSS"
 
             # Require client certificates (mutual TLS)
