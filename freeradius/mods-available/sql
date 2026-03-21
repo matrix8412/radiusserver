@@ -21,8 +21,8 @@ sql {
 
     # Connection pool
     pool {
-        start = ${thread[pool].start_servers}
-        min = ${thread[pool].min_spare_servers}
+        start = 0
+        min = 0
         max = ${thread[pool].max_servers}
         spare = ${thread[pool].max_spare_servers}
         uses = 0
