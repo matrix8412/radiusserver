@@ -1,0 +1,133 @@
+# ============================================================
+# RadiusServer – Default Virtual Server
+# ============================================================
+# Handles standard RADIUS authentication and accounting.
+# Integrates SQL-backed users, group attributes, and TOTP.
+# ============================================================
+
+server default {
+
+    listen {
+        type = auth
+        ipaddr = *
+        port = 0  # Uses port from radiusd.conf
+    }
+
+    listen {
+        type = acct
+        ipaddr = *
+        port = 0
+    }
+
+    # ============================================================
+    # AUTHORIZE – Build the check/reply item list
+    # ============================================================
+    authorize {
+        # Filter problematic attributes
+        filter_username
+
+        # Preprocess hints and huntgroups
+        preprocess
+
+        # Read check/reply from SQL
+        sql
+
+        # Check if user account is disabled
+        if ("%{sql:SELECT CASE WHEN EXISTS(SELECT 1 FROM radius_users WHERE username='%{User-Name}' AND enabled=false) THEN 'disabled' ELSE 'ok' END}" == "disabled") {
+            update reply {
+                Reply-Message := "Account disabled"
+            }
+            reject
+        }
+
+        # ---- TOTP Handling ----
+        # If user has TOTP enabled and verified, extract TOTP from password
+        if ("%{sql:SELECT COALESCE((SELECT 'yes' FROM radius_users WHERE username='%{User-Name}' AND totp_enabled=true AND totp_verified=true), 'no')}" == "yes") {
+            update control {
+                Tmp-String-8 := "totp_required"
+            }
+
+            # Password format: <actual_password><6_digit_totp>
+            if (&User-Password =~ /^(.+)([0-9]{6})$/) {
+                update control {
+                    Tmp-String-9 := "%{2}"
+                }
+                update request {
+                    User-Password := "%{1}"
+                }
+            }
+            else {
+                update reply {
+                    Reply-Message := "TOTP code required. Append 6-digit code to your password."
+                }
+                reject
+            }
+        }
+
+        # Check password (PAP, CHAP, MS-CHAP)
+        pap
+    }
+
+    # ============================================================
+    # AUTHENTICATE
+    # ============================================================
+    authenticate {
+        Auth-Type PAP {
+            pap
+        }
+    }
+
+    # ============================================================
+    # PRE-ACCOUNTING
+    # ============================================================
+    preacct {
+        preprocess
+        acct_unique
+    }
+
+    # ============================================================
+    # ACCOUNTING
+    # ============================================================
+    accounting {
+        sql
+    }
+
+    # ============================================================
+    # POST-AUTH
+    # ============================================================
+    post-auth {
+        # Validate TOTP if required
+        if (&control:Tmp-String-8 == "totp_required") {
+            totp_validate
+            if (reject || fail) {
+                update reply {
+                    Reply-Message := "Invalid TOTP code"
+                }
+                reject
+            }
+        }
+
+        # Log successful auth
+        sql
+
+        # Remove the TOTP temp attributes
+        update control {
+            Tmp-String-8 !* ANY
+            Tmp-String-9 !* ANY
+        }
+
+        Post-Auth-Type REJECT {
+            sql
+            update reply {
+                Reply-Message += "Authentication rejected"
+            }
+        }
+    }
+
+    # ============================================================
+    # SESSION (Simultaneous-Use checking)
+    # ============================================================
+    session {
+        sql
+    }
+}

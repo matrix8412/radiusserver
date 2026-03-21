@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+.npm
+
+# Build output
+backend/dist/
+frontend/dist/
+*.js.map
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage
+coverage/
+
+# Certificates (generated)
+certs/*.pem
+certs/*.key
+certs/*.crt
+certs/*.csr
+certs/*.p12
+!certs/.gitkeep
+
+# Database data
+data/
+
+# Temp
+tmp/
+.tmp/

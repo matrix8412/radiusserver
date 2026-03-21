@@ -1,0 +1,12 @@
+{
+  "name": "RADIUS Admin",
+  "short_name": "RadAdmin",
+  "description": "RADIUS Server Administration Panel",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1976d2",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

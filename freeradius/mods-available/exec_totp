@@ -1,0 +1,16 @@
+# ============================================================
+# RadiusServer – TOTP Validation Exec Module
+# ============================================================
+# Calls the backend API to validate a TOTP code.
+# Used in the default virtual server when a user has TOTP enabled.
+# ============================================================
+
+exec totp_validate {
+    wait = yes
+    program = "/app/scripts/validate-totp.sh %{User-Name} %{control:Tmp-String-9}"
+    shell_escape = yes
+    timeout = 5
+
+    input_pairs = request
+    output_pairs = reply
+}

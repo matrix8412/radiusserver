@@ -1,0 +1,197 @@
+# ============================================================
+# RadiusServer – SQL Module Configuration
+# ============================================================
+# Connects FreeRADIUS to PostgreSQL for user auth, accounting,
+# and client (NAS) management.
+# ============================================================
+
+sql {
+    dialect = "postgresql"
+    driver = "rlm_sql_${dialect}"
+
+    server = "127.0.0.1"
+    port = 5432
+    login = "%%POSTGRES_USER%%"
+    password = "%%POSTGRES_PASSWORD%%"
+    radius_db = "%%POSTGRES_DB%%"
+
+    # Read NAS clients from the 'nas' table
+    read_clients = yes
+    client_table = "nas"
+
+    # Connection pool
+    pool {
+        start = ${thread[pool].start_servers}
+        min = ${thread[pool].min_spare_servers}
+        max = ${thread[pool].max_servers}
+        spare = ${thread[pool].max_spare_servers}
+        uses = 0
+        lifetime = 0
+        idle_timeout = 60
+    }
+
+    # Safe characters for SQL escaping
+    safe_characters = "@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_: /+"
+
+    # ============================================================
+    # SQL Queries – Authorization
+    # ============================================================
+
+    authorize_check_query = "\
+        SELECT id, username, attribute, value, op \
+        FROM radcheck \
+        WHERE username = '%{SQL-User-Name}' \
+        ORDER BY id"
+
+    authorize_reply_query = "\
+        SELECT id, username, attribute, value, op \
+        FROM radreply \
+        WHERE username = '%{SQL-User-Name}' \
+        ORDER BY id"
+
+    authorize_group_check_query = "\
+        SELECT id, groupname, attribute, value, op \
+        FROM radgroupcheck \
+        WHERE groupname = '%{${group_attribute}}' \
+        ORDER BY id"
+
+    authorize_group_reply_query = "\
+        SELECT id, groupname, attribute, value, op \
+        FROM radgroupreply \
+        WHERE groupname = '%{${group_attribute}}' \
+        ORDER BY id"
+
+    group_membership_query = "\
+        SELECT groupname \
+        FROM radusergroup \
+        WHERE username = '%{SQL-User-Name}' \
+        ORDER BY priority"
+
+    # ============================================================
+    # SQL Queries – Simultaneous-Use check
+    # ============================================================
+
+    simul_count_query = "\
+        SELECT COUNT(*) \
+        FROM radacct \
+        WHERE username = '%{SQL-User-Name}' \
+        AND acctstoptime IS NULL"
+
+    simul_verify_query = "\
+        SELECT radacctid, acctsessionid, username, nasipaddress, \
+               nasportid, framedipaddress, callingstationid, \
+               framedprotocol \
+        FROM radacct \
+        WHERE username = '%{SQL-User-Name}' \
+        AND acctstoptime IS NULL"
+
+    # ============================================================
+    # SQL Queries – Accounting
+    # ============================================================
+
+    accounting {
+        reference = "%{tolower:type.%{Acct-Status-Type}.query}"
+
+        type {
+            start {
+                query = "\
+                    INSERT INTO radacct \
+                        (acctsessionid, acctuniqueid, username, realm, \
+                         nasipaddress, nasportid, nasporttype, \
+                         acctstarttime, acctauthentic, \
+                         connectinfo_start, calledstationid, \
+                         callingstationid, servicetype, framedprotocol, \
+                         framedipaddress, framedipv6address, \
+                         framedipv6prefix, framedinterfaceid, \
+                         delegatedipv6prefix, class) \
+                    VALUES \
+                        ('%{Acct-Session-Id}', '%{Acct-Unique-Session-Id}', \
+                         '%{SQL-User-Name}', NULLIF('%{Realm}',''), \
+                         '%{NAS-IP-Address}', NULLIF('%{NAS-Port-Id}',''), \
+                         NULLIF('%{NAS-Port-Type}',''), \
+                         '%S'::timestamptz, \
+                         NULLIF('%{Acct-Authentic}',''), \
+                         NULLIF('%{Connect-Info}',''), \
+                         '%{Called-Station-Id}', \
+                         '%{Calling-Station-Id}', \
+                         NULLIF('%{Service-Type}',''), \
+                         NULLIF('%{Framed-Protocol}',''), \
+                         '%{Framed-IP-Address}', \
+                         '%{Framed-IPv6-Address}', \
+                         '%{Framed-IPv6-Prefix}', \
+                         '%{Framed-Interface-Id}', \
+                         '%{Delegated-IPv6-Prefix}', \
+                         NULLIF('%{Class}','')) \
+                    ON CONFLICT (acctuniqueid) DO NOTHING"
+            }
+
+            interim-update {
+                query = "\
+                    UPDATE radacct \
+                    SET acctupdatetime = '%S'::timestamptz, \
+                        acctinterval = '%{Acct-Delay-Time:-0}'::integer + \
+                                       '%{Acct-Session-Time:-0}'::integer - \
+                                       COALESCE(acctsessiontime, 0), \
+                        acctsessiontime = '%{Acct-Session-Time:-0}'::integer, \
+                        acctinputoctets = '%{Acct-Input-Octets:-0}'::bigint + \
+                                          ('%{Acct-Input-Gigawords:-0}'::bigint * 4294967296), \
+                        acctoutputoctets = '%{Acct-Output-Octets:-0}'::bigint + \
+                                           ('%{Acct-Output-Gigawords:-0}'::bigint * 4294967296), \
+                        framedipaddress = CASE WHEN '%{Framed-IP-Address}' != '' \
+                                          THEN '%{Framed-IP-Address}' \
+                                          ELSE framedipaddress END, \
+                        class = CASE WHEN '%{Class}' != '' \
+                                THEN '%{Class}' ELSE class END \
+                    WHERE acctuniqueid = '%{Acct-Unique-Session-Id}'"
+            }
+
+            stop {
+                query = "\
+                    UPDATE radacct \
+                    SET acctstoptime = '%S'::timestamptz, \
+                        acctsessiontime = '%{Acct-Session-Time:-0}'::integer, \
+                        acctinputoctets = '%{Acct-Input-Octets:-0}'::bigint + \
+                                          ('%{Acct-Input-Gigawords:-0}'::bigint * 4294967296), \
+                        acctoutputoctets = '%{Acct-Output-Octets:-0}'::bigint + \
+                                           ('%{Acct-Output-Gigawords:-0}'::bigint * 4294967296), \
+                        acctterminatecause = '%{Acct-Terminate-Cause}', \
+                        connectinfo_stop = NULLIF('%{Connect-Info}',''), \
+                        class = CASE WHEN '%{Class}' != '' \
+                                THEN '%{Class}' ELSE class END \
+                    WHERE acctuniqueid = '%{Acct-Unique-Session-Id}'"
+            }
+
+            accounting-on {
+                query = "\
+                    UPDATE radacct \
+                    SET acctstoptime = '%S'::timestamptz, \
+                        acctterminatecause = 'NAS-Reboot' \
+                    WHERE nasipaddress = '%{NAS-IP-Address}' \
+                    AND acctstoptime IS NULL"
+            }
+
+            accounting-off {
+                query = "\
+                    UPDATE radacct \
+                    SET acctstoptime = '%S'::timestamptz, \
+                        acctterminatecause = 'NAS-Reboot' \
+                    WHERE nasipaddress = '%{NAS-IP-Address}' \
+                    AND acctstoptime IS NULL"
+            }
+        }
+    }
+
+    # ============================================================
+    # SQL Queries – Post-Auth
+    # ============================================================
+
+    post-auth {
+        query = "\
+            INSERT INTO radpostauth (username, pass, reply, authdate, class) \
+            VALUES ('%{User-Name}', '%{%{User-Password}:-%{Chap-Password}}', \
+                    '%{reply:Packet-Type}', NOW(), NULLIF('%{Class}',''))"
+    }
+
+    # Group attribute
+    group_attribute = "${.:instance}-SQL-Group"
+}

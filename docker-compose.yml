@@ -1,0 +1,50 @@
+# ============================================================
+# RadiusServer - Docker Compose
+# ============================================================
+# Single-container deployment: PostgreSQL, FreeRADIUS, and the
+# web admin application all run inside one image managed by
+# supervisord. Persistent data is stored in a named volume.
+# ============================================================
+
+services:
+  radiusserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: radiusserver
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      # Web admin UI + API
+      - "3000:3000"
+      # RADIUS Authentication (UDP)
+      - "1812:1812/udp"
+      # RADIUS Accounting (UDP)
+      - "1813:1813/udp"
+      # RadSec (RADIUS over TLS)
+      - "2083:2083/tcp"
+    volumes:
+      # Persistent PostgreSQL data
+      - pgdata:/var/lib/postgresql/data
+      # Persistent certificates
+      - certs:/etc/raddb/certs
+      # Optional: backup directory
+      - ./backup:/backup
+    healthcheck:
+      test: ["CMD", "/app/scripts/healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+volumes:
+  pgdata:
+    driver: local
+  certs:
+    driver: local
