@@ -42,6 +42,7 @@ sql {
     acct_table2      = "radacct"
     postauth_table   = "radpostauth"
     client_table     = "nas"
+    group_attribute  = "SQL-Group"
 
     # Use the standard FreeRADIUS PostgreSQL query definitions.
     # These are installed by the freeradius-postgresql package and
