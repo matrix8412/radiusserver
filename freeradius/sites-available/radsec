@@ -39,21 +39,6 @@ server radsec {
             lifetime = 0
             idle_timeout = 3600
         }
-
-        # RadSec clients present certs – identify by cert CN
-        clients = radsec_clients
-    }
-
-    # Accept any TLS client that presents a valid cert signed by our CA
-    clients radsec_clients {
-        client any_radsec {
-            ipaddr = 0.0.0.0/0
-            proto = tls
-            secret = radsec
-
-            # Limit to connections with valid client certificates
-            require_message_authenticator = no
-        }
     }
 
     # ---- Authorization ----
