@@ -15,6 +15,9 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    // Disable the inline modulepreload polyfill so CSP (script-src 'self') does
+    // not block an inline <script> that Vite injects and that the bundles depend on.
+    modulePreload: { polyfill: false },
     rollupOptions: {
       output: {
         manualChunks: {

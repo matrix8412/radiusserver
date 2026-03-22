@@ -30,11 +30,14 @@ init_postgres() {
         chown -R postgres:postgres "$PGDATA"
         su - postgres -c "initdb -D $PGDATA --auth=trust --encoding=UTF8 --locale=C"
 
-        # Configure pg_hba.conf for local trust + md5 for TCP
+        # Configure pg_hba.conf
+        # Use 'trust' for local UNIX socket and 127.0.0.1 TCP (container-internal only).
+        # PostgreSQL 17 defaults password_encryption=scram-sha-256; using 'trust' for
+        # loopback avoids the md5/scram mismatch that causes auth failures.
         cat > "$PGDATA/pg_hba.conf" <<EOF
 local   all   all                 trust
-host    all   all   127.0.0.1/32  md5
-host    all   all   ::1/128       md5
+host    all   all   127.0.0.1/32  trust
+host    all   all   ::1/128       trust
 EOF
         log "PostgreSQL data directory initialized."
     fi
