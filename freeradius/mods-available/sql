@@ -32,6 +32,17 @@ sql {
 
     safe_characters = "@abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_: /+"
 
+    # Table names referenced by queries.conf
+    authcheck_table  = "radcheck"
+    authreply_table  = "radreply"
+    groupcheck_table = "radgroupcheck"
+    groupreply_table = "radgroupreply"
+    usergroup_table  = "radusergroup"
+    acct_table1      = "radacct"
+    acct_table2      = "radacct"
+    postauth_table   = "radpostauth"
+    client_table     = "nas"
+
     # Use the standard FreeRADIUS PostgreSQL query definitions.
     # These are installed by the freeradius-postgresql package and
     # correctly handle group attribute registration timing.
