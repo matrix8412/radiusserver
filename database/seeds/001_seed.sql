@@ -103,7 +103,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO admin_users (username, password_hash, display_name, enabled)
 VALUES (
     'admin',
-    '$2b$12$LJ3m4ys3Lg8xHwZGOPgiRu8sHbfJNGTqhGRFhYqXtFOmGSqFh5.vy',
+    '$2b$12$NNxGWKFEfYKjtByjmowodeKvBqx5Wb56Nsg.sVFWb9Pi/H7nuhFcG',
     'System Administrator',
     true
 )

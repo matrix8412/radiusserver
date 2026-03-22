@@ -19,7 +19,7 @@ curl -sf http://127.0.0.1:${APP_PORT:-3000}/api/health > /dev/null || {
 }
 
 # Check FreeRADIUS (verify process is running)
-pgrep -x radiusd > /dev/null || {
+pgrep radiusd > /dev/null || {
     echo "FreeRADIUS is not running"
     exit 1
 }

@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator';
 import { authenticateAdmin } from '../services/admin.service';
 import { loginLimiter } from '../middleware/rateLimit';
 import { logAudit, getClientIp } from '../middleware/audit';
+import config from '../config';
 
 const router = Router();
 
@@ -23,7 +24,7 @@ router.post(
 
       res.cookie('token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: config.cookieSecure,
         sameSite: 'lax',
         maxAge: 3600000, // 1 hour
         path: '/',

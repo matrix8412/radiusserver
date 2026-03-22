@@ -22,7 +22,7 @@ router.get('/', async (_req: Request, res: Response) => {
 
   // Check FreeRADIUS
   try {
-    execSync('pgrep -x radiusd', { encoding: 'utf-8' });
+    execSync('pgrep radiusd', { encoding: 'utf-8' });
     checks.freeradius = { status: 'ok' };
   } catch {
     checks.freeradius = { status: 'error', message: 'Process not running' };

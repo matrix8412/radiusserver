@@ -20,6 +20,7 @@ const config = {
   },
 
   bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
+  cookieSecure: process.env.COOKIE_SECURE === 'true',
 
   internalSecret: process.env.INTERNAL_SECRET || 'dev-internal-secret',
 

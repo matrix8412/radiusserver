@@ -23,7 +23,7 @@ services:
       # RADIUS Accounting (UDP)
       - "1813:1813/udp"
       # RadSec (RADIUS over TLS)
-      - "2083:2083/tcp"
+      - "2183:2083/tcp"
     volumes:
       # Persistent PostgreSQL data
       - pgdata:/var/lib/postgresql/data

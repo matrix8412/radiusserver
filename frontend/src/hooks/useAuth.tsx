@@ -11,7 +11,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const checkAuth = useCallback(async () => {
     try {
       const { data } = await api.get('/auth/me');
-      setUser(data);
+      setUser(data.data);
     } catch {
       setUser(null);
     } finally {
@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     const { data } = await api.post('/auth/login', credentials);
-    setUser(data.admin);
+    setUser(data.data);
   }, []);
 
   const logout = useCallback(async () => {
